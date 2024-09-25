@@ -1,10 +1,12 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.dto.request.SaveUserRequestDTO;
 import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.mapper.UserMapper;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
-import com.example.demo.dto.request.UserRequestDTO;
+import com.example.demo.dto.request.UpdateUserRequestDTO;
 import com.example.demo.dto.response.UserResponseDTO;
 import com.example.demo.model.Role;
 import com.example.demo.model.User;
@@ -21,9 +23,18 @@ import org.springframework.data.domain.Sort;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final UserMapper userMapper;
+
+    private User getUserById(long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
+
+    private Role getRoleById(long roleId) {
+        return roleRepository.findById(roleId).orElseThrow(() -> new ResourceNotFoundException("Role not found"));
+    }
 
     @Override
-    public long saveUser(UserRequestDTO userRequestDTO) {
+    public long saveUser(SaveUserRequestDTO userRequestDTO) {
         Role role = getRoleById(userRequestDTO.getRoleId());
 
         User userEntity = User.builder()
@@ -40,8 +51,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUser(long userId, UserRequestDTO user) {
-
+    public void updateUser(long userId, UpdateUserRequestDTO user) {
+        User userUpdate = getUserById(userId);
+        userUpdate.setEmail(user.getEmail());
+        userUpdate.setPassword(user.getPassword());
+        userUpdate.setStatus(user.getStatus());
+        userRepository.save(userUpdate);
     }
 
     @Override
@@ -57,7 +72,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDTO getUser(long userId) {
         User user = getUserById(userId);
-        return mapToUserResponseDTO(user);
+        return userMapper.toUserResponseDTO(user);
     }
 
     @Override
@@ -71,24 +86,6 @@ public class UserServiceImpl implements UserService {
         Pageable pageable = PageRequest.of((int) page, (int) size, sort);
         Page<User> userPage = userRepository.findAll(pageable);
 
-        return userPage.map(this::mapToUserResponseDTO);
-    }
-
-    private User getUserById(long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
-    }
-
-    private Role getRoleById(long roleId) {
-        return roleRepository.findById(roleId).orElseThrow(() -> new ResourceNotFoundException("Role not found"));
-    }
-
-    private UserResponseDTO mapToUserResponseDTO(User user) {
-        return UserResponseDTO.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .status(user.getStatus())
-                .roleId(user.getRole().getId())
-                .build();
+        return userPage.map(userMapper::toUserResponseDTO);
     }
 }
