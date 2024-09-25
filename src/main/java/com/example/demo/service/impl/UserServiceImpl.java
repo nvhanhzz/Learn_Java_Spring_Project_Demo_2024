@@ -1,5 +1,6 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
@@ -24,10 +25,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public long saveUser(UserRequestDTO userRequestDTO) {
         Role role = getRoleById(userRequestDTO.getRoleId());
-
-        if (role == null) {
-            // throw exception here
-        }
 
         User userEntity = User.builder()
                 .username(userRequestDTO.getUsername())
@@ -59,12 +56,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDTO getUser(long userId) {
-        User user = userRepository.findById(userId).orElse(null);
-        if (user == null) {
-            // throw new UserNotFoundException("User with ID " + userId + " not found.");
-            return null;
-        }
-
+        User user = getUserById(userId);
         return mapToUserResponseDTO(user);
     }
 
@@ -83,11 +75,11 @@ public class UserServiceImpl implements UserService {
     }
 
     private User getUserById(long userId) {
-        return userRepository.findById(userId).orElse(null);
+        return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
     private Role getRoleById(long roleId) {
-        return roleRepository.findById(roleId).orElse(null);
+        return roleRepository.findById(roleId).orElseThrow(() -> new ResourceNotFoundException("Role not found"));
     }
 
     private UserResponseDTO mapToUserResponseDTO(User user) {
