@@ -12,6 +12,8 @@ import java.util.Date;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -59,4 +61,68 @@ public class GlobalExceptionHandler {
         return errorResponse;
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(BAD_REQUEST)
+    public ErrorResponse handleIllegalArgumentException(IllegalArgumentException e, WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setTimestamp(new Date());
+        errorResponse.setPath(request.getDescription(false).replace("uri=", ""));
+        errorResponse.setStatus(BAD_REQUEST.value());
+        errorResponse.setError("Bad Request");
+        errorResponse.setMessage(e.getMessage());
+
+        return errorResponse;
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    @ResponseStatus(UNAUTHORIZED)
+    public ErrorResponse handleUnauthorizedException(UnauthorizedException e, WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setTimestamp(new Date());
+        errorResponse.setPath(request.getDescription(false).replace("uri=", ""));
+        errorResponse.setStatus(UNAUTHORIZED.value());
+        errorResponse.setError("Unauthorized");
+        errorResponse.setMessage(e.getMessage());
+
+        return errorResponse;
+    }
+
+    @ExceptionHandler(NullPointerException.class)
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleNullPointerException(NullPointerException e, WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setTimestamp(new Date());
+        errorResponse.setPath(request.getDescription(false).replace("uri=", ""));
+        errorResponse.setStatus(INTERNAL_SERVER_ERROR.value());
+        errorResponse.setError("Null Pointer Exception");
+        errorResponse.setMessage("A null value was encountered where it shouldn't have been.");
+
+        return errorResponse;
+    }
+
+    @ExceptionHandler(CustomAccessDeniedException.class)
+    @ResponseStatus(UNAUTHORIZED)
+    public ErrorResponse handleCustomAccessDeniedException(CustomAccessDeniedException ex, WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setTimestamp(new Date());
+        errorResponse.setPath(request.getDescription(false).replace("uri=", ""));
+        errorResponse.setStatus(UNAUTHORIZED.value());
+        errorResponse.setError("Denied Access");
+        errorResponse.setMessage(ex.getMessage());
+
+        return errorResponse;
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleGeneralException(Exception e, WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setTimestamp(new Date());
+        errorResponse.setPath(request.getDescription(false).replace("uri=", ""));
+        errorResponse.setStatus(INTERNAL_SERVER_ERROR.value());
+        errorResponse.setError("Internal Server Error");
+        errorResponse.setMessage(e.getMessage());
+
+        return errorResponse;
+    }
 }

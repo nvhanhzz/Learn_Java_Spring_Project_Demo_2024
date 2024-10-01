@@ -12,8 +12,6 @@ public interface UserService {
 
     void changeStatus(long userId, String userStatus);
 
-    void deleteUser(long userId);
-
     UserResponseDTO getUser(long userId);
 
     Page<UserResponseDTO> getUsers(long page, long size, String sortBy, String sortDirection);

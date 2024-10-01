@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.enumPackage.Status;
 import com.example.demo.dto.request.SaveUserRequestDTO;
 import com.example.demo.dto.response.ResponseData;
 import io.swagger.v3.oas.annotations.Operation;
@@ -64,5 +65,17 @@ public class UserController {
     public ResponseData<?> updateUser(@PathVariable long userId, @Valid @RequestBody UpdateUserRequestDTO userDTO) {
         userService.updateUser(userId, userDTO);
         return new ResponseData<>(HttpStatus.ACCEPTED.value(), "User updated successfully");
+    }
+
+    @Operation(
+            method = "PATCH",
+            summary = "Update status of a user",
+            description = "Update status of user by providing their user ID"
+    )
+    @PatchMapping("/{userId}/status/{status}")
+    public ResponseData<?> updateUserStatus(@PathVariable long userId, @PathVariable String status) {
+        Status.validate(status);
+        userService.changeStatus(userId, status);
+        return new ResponseData<>(HttpStatus.ACCEPTED.value(), "User status updated successfully");
     }
 }

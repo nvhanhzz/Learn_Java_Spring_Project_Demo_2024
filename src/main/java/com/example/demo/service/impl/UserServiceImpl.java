@@ -3,6 +3,7 @@ package com.example.demo.service.impl;
 import com.example.demo.dto.request.SaveUserRequestDTO;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.mapper.UserMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
@@ -18,12 +19,16 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     private User getUserById(long userId) {
         return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -35,12 +40,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public long saveUser(SaveUserRequestDTO userRequestDTO) {
+        List<User> existUsers = userRepository.findByUsernameOrEmail(userRequestDTO.getUsername(), userRequestDTO.getEmail());
+        if (!existUsers.isEmpty()) {
+            throw new IllegalArgumentException("Username or email already exists");
+        }
+
         Role role = getRoleById(userRequestDTO.getRoleId());
 
         User userEntity = User.builder()
                 .username(userRequestDTO.getUsername())
                 .email(userRequestDTO.getEmail())
-                .password(userRequestDTO.getPassword())
+                .password(passwordEncoder.encode(userRequestDTO.getPassword()))
                 .status(userRequestDTO.getStatus())
                 .role(role)
                 .build();
@@ -53,20 +63,35 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateUser(long userId, UpdateUserRequestDTO user) {
         User userUpdate = getUserById(userId);
-        userUpdate.setEmail(user.getEmail());
-        userUpdate.setPassword(user.getPassword());
-        userUpdate.setStatus(user.getStatus());
+
+        if (user.getEmail() != null && !user.getEmail().equals(userUpdate.getEmail())) {
+
+            Optional<User> userWithEmail = Optional.ofNullable(userRepository.findByEmail(user.getEmail()));
+            if (userWithEmail.isPresent() && userWithEmail.get().getId() != userId) {
+                throw new IllegalArgumentException("Email is already in use by another user");
+            }
+            userUpdate.setEmail(user.getEmail());
+        }
+
+        if (user.getPassword() != null && !user.getPassword().equals(userUpdate.getPassword())) {
+            String encodedPassword = passwordEncoder.encode(user.getPassword());
+            userUpdate.setPassword(encodedPassword);
+        }
+
+        if (user.getStatus() != null && !user.getStatus().equals(userUpdate.getStatus())) {
+            userUpdate.setStatus(user.getStatus());
+        }
+
         userRepository.save(userUpdate);
     }
 
+
     @Override
     public void changeStatus(long userId, String userStatus) {
+        User user = getUserById(userId);
+        user.setStatus(userStatus.toLowerCase());
 
-    }
-
-    @Override
-    public void deleteUser(long userId) {
-
+        userRepository.save(user);
     }
 
     @Override
