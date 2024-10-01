@@ -3,13 +3,12 @@ package com.example.demo.service;
 import com.example.demo.dto.request.SaveProductRequestDTO;
 import com.example.demo.dto.request.UpdateProductRequestDTO;
 import com.example.demo.dto.response.ProductResponseDTO;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 public interface ProductService {
     ProductResponseDTO getProduct(long id);
 
-    List<ProductResponseDTO> getAllProducts();
+    Page<ProductResponseDTO> getProducts(int page, int size);
 
     long saveProduct(SaveProductRequestDTO saveProductRequestDTO);
 

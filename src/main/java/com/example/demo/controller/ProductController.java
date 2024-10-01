@@ -4,11 +4,13 @@ import com.example.demo.dto.request.SaveProductRequestDTO;
 import com.example.demo.dto.request.UpdateProductRequestDTO;
 import com.example.demo.dto.response.ProductResponseDTO;
 import com.example.demo.dto.response.ResponseData;
+import com.example.demo.dto.response.UserResponseDTO;
 import com.example.demo.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,12 +35,14 @@ public class ProductController {
 
     @Operation(
             method = "GET",
-            summary = "Get all product",
-            description = "Retrieve all product's details"
+            summary = "Get a list of products",
+            description = "Retrieve a paginated list of products, with sorting and filtering options"
     )
-    @GetMapping("/all")
-    public ResponseData<List<ProductResponseDTO>> getAllProduct() {
-        return new ResponseData<>(HttpStatus.OK.value(), "Get products successfully", productService.getAllProducts());
+    @GetMapping("")
+    public ResponseData<Page<ProductResponseDTO>> getProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return new ResponseData<>(HttpStatus.OK.value(), "Get list product successfully", productService.getProducts(page, size));
     }
 
     @Operation(

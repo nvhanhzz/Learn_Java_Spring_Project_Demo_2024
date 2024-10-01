@@ -2,6 +2,7 @@ package com.example.demo.service.impl;
 
 import com.example.demo.dto.request.LoginRequestDTO;
 import com.example.demo.dto.response.LoginResponseDTO;
+import com.example.demo.dto.response.UserResponseDTO;
 import com.example.demo.enumPackage.Status;
 import com.example.demo.exception.UnauthorizedException;
 import com.example.demo.model.User;
@@ -45,5 +46,16 @@ public class AuthServiceImpl implements AuthService {
         } catch (Exception e) {
             throw new RuntimeException("Invalid username or password");
         }
+    }
+
+    @Override
+    public UserResponseDTO getCurrentUser(User user) {
+        return UserResponseDTO.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .username(user.getUsername())
+                .status(user.getStatus())
+                .roleId(user.getRole().getId())
+                .build();
     }
 }

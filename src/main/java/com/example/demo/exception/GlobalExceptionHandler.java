@@ -10,17 +10,14 @@ import org.springframework.web.context.request.WebRequest;
 
 import java.util.Date;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.*;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler({ConstraintViolationException.class,
             MissingServletRequestParameterException.class, MethodArgumentNotValidException.class})
-    @ResponseStatus(BAD_REQUEST)
+    @ResponseStatus(OK)
     public ErrorResponse handleValidationException(Exception e, WebRequest request) {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setTimestamp(new Date());
@@ -49,7 +46,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    @ResponseStatus(NOT_FOUND)
+    @ResponseStatus(OK)
     public ErrorResponse handleResourceNotFoundException(ResourceNotFoundException e, WebRequest request) {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setTimestamp(new Date());
@@ -62,7 +59,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    @ResponseStatus(BAD_REQUEST)
+    @ResponseStatus(OK)
     public ErrorResponse handleIllegalArgumentException(IllegalArgumentException e, WebRequest request) {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setTimestamp(new Date());
@@ -75,7 +72,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UnauthorizedException.class)
-    @ResponseStatus(UNAUTHORIZED)
+    @ResponseStatus(OK)
     public ErrorResponse handleUnauthorizedException(UnauthorizedException e, WebRequest request) {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setTimestamp(new Date());
@@ -88,7 +85,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NullPointerException.class)
-    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    @ResponseStatus(OK)
     public ErrorResponse handleNullPointerException(NullPointerException e, WebRequest request) {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setTimestamp(new Date());
@@ -101,7 +98,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(CustomAccessDeniedException.class)
-    @ResponseStatus(UNAUTHORIZED)
+    @ResponseStatus(OK)
     public ErrorResponse handleCustomAccessDeniedException(CustomAccessDeniedException ex, WebRequest request) {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setTimestamp(new Date());
@@ -114,7 +111,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    @ResponseStatus(OK)
     public ErrorResponse handleGeneralException(Exception e, WebRequest request) {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setTimestamp(new Date());

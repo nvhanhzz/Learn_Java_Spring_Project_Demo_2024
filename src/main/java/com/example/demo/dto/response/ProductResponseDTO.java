@@ -8,6 +8,7 @@ import java.io.Serializable;
 @Getter
 @Builder
 public class ProductResponseDTO implements Serializable {
+    private Long id;
     private String name;
     private String description;
     private Double price;

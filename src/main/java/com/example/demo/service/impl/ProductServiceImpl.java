@@ -9,10 +9,10 @@ import com.example.demo.model.Product;
 import com.example.demo.repository.ProductRepository;
 import com.example.demo.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,12 +32,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductResponseDTO> getAllProducts() {
-        List<Product> products = productRepository.findAll();
+    public Page<ProductResponseDTO> getProducts(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
 
-        return products.stream()
-                .map(productMapper::toProductResponseDTO)
-                .collect(Collectors.toList());
+        Page<Product> productPage = productRepository.findAll(pageable);
+
+        return productPage.map(productMapper::toProductResponseDTO);
     }
 
     @Override
